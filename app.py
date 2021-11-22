@@ -9,13 +9,26 @@ import pandas as pd
 
 ## TODO: make sure table updates, figure out why year options , update the for years in year part of the df building loop.  Change it so that for each team it grabs every year past the starting year that appears in the api summary for their team
 
-ids = ['1','2','3','4','5','6','7','8','9','10','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','28','29','30']
+ids = ['1','2','3','4','5','6','7','8','9','10','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','28','29','30', '52']
+#figure out why 53 arizona coyotes, and 54, vegas golden knights break the script
 
-years = ['20192020', '20182019', '20172018', '20162017', '20152016', '20142015', '20132014', '20122013', '20112012', '20102011']
+years = ['20002001','20012002','20022003','20032004','20052006','20062007','20072008','20082009','20092010','20102011','20112012','20122013','20132014','20142015','20152016','20162017','20172018','20182019','20192020','20202021']
 
 df = pd.DataFrame(columns =['gamesPlayed', 'wins', 'losses', 'ot', 'pts', 'ptPctg', 'goalsPerGame', 'goalsAgainstPerGame', 'evGGARatio', 'powerPlayPercentage', 'powerPlayGoals', 'powerPlayGoalsAgainst', 'powerPlayOpportunities', 'penaltyKillPercentage', 'shotsPerGame', 'shotsAllowed', 'winScoreFirst', 'winOppScoreFirst', 'winLeadFirstPer', 'winLeadSecondPer', 'winOutshootOpp', 'winOutshotByOpp', 'faceOffsTaken', 'faceOffsWon', 'faceOffsLost', 'faceOffWinPercentage', 'shootingPctg', 'savePctg', 'Team'] )
 for i in ids:
-    for year in years:
+    #First get what years teams played, that way we only pull data from years where data exists
+    teamdata = requests.get('https://statsapi.web.nhl.com/api/v1/teams/' + i)
+    year1 = teamdata.json()['teams'][0]['firstYearOfPlay']
+    if id == '53':
+        #A specific carve out is made for the Yotes, as there start year doesn't match the first year stats exist, as a result of the org being passed around a few times
+        startpoint = years[-7]
+    elif int(year1) < int(years[0][0:4]):
+        startpoint = 0
+    else:
+        yearstring = year1 + str(int(year1) +1)
+        startpoint = years.index(yearstring)
+
+    for year in years[startpoint:]:
         teams = requests.get('https://statsapi.web.nhl.com/api/v1/teams/' + i +'/?expand=team.stats&season='+year)
 
         team_name = teams.json()['teams'][0]['name']
@@ -79,7 +92,6 @@ app.layout = html.Div([
                 {'label': 'Winnipeg Jets', 'value': 'Winnipeg Jets'},
                 {'label': 'Arizona Coyotes', 'value': 'Arizona Coyotes'},
                 {'label': 'Vegas Golden Knights', 'value': 'Vegas Golden Knights'},
-                {'label': 'Seattle Kraken', 'value': 'Seattle Kraken'},
                 ],
             placeholder='Select a Team',
             value = 'Philadelphia Flyers',
