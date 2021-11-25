@@ -8,6 +8,7 @@ import requests
 import pandas as pd
 
 ## TODO: make sure table updates, figure out why year options , update the for years in year part of the df building loop.  Change it so that for each team it grabs every year past the starting year that appears in the api summary for their team
+color_dict = {'New Jersey Devils':['black', 'red'], 'New York Islanders':['blue','orange'], 'New York Rangers':['blue','red'], 'Philadelphia Flyers':['orange', 'black'], 'Pittsburgh Penguins':['black','yellow'], 'Boston Bruins':['black','yellow'], 'Buffalo Sabres':['blue','yellow'], 'Montréal Canadiens':['red','blue'], 'Ottawa Senators': ['red','black'], 'Toronto Maple Leafs':['blue','white'], 'Carolina Hurricanes': ['black','red'], 'Florida Panthers':['blue','red'], 'Tampa Bay Lightning':['silver','blue'], 'Washington Capitals': ['blue','red'], 'Chicago Blackhawks':['red','black'], 'Detroit Red Wings':['red','white'], 'Nashville Predators':['yellow','blue'], 'St. Louis Blues':['blue','yellow'], 'Calgary Flames':['red','orange'], 'Colorado Avalanche':['red','blue'], 'Edmonton Oilers':['orange','blue'], 'Vancouver Canucks':['blue','white'], 'Anaheim Ducks':['green','black'], 'Dallas Stars':['green','white'], 'Los Angeles Kings':['black','white'], 'San Jose Sharks':['green','black'], 'Columbus Blue Jackets':['red','blue'], 'Minnesota Wild':['green','red'], 'Winnipeg Jets':['blue','white'], 'Arizona Coyotes':['green','red'], 'Vegas Golden Knights':['yellow','red']}
 
 ids = ['1','2','3','4','5','6','7','8','9','10','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','28','29','30', '52', '53','54']
 
@@ -117,7 +118,10 @@ app.layout = html.Div([
             html.Div([], id='plot4')
         ], style={'display': 'flex'}),
 
-    html.Div([ ], id='plot5'),
+    html.Div([
+            html.Div([], id='plot5'),
+            html.Div([], id='plot6')
+        ], style={'display': 'flex'}),
 ])
 
 @app.callback(
@@ -151,11 +155,14 @@ def update_figure(selected_year, team, graphs):
     filtered_df = df[df['Team'] == team]
     filtered_df = filtered_df[(filtered_df['Year']>= (int(selected_year) - 2)) & (df['Year']<= (int(selected_year) + 2))]
 
-    goalsFig = px.line(filtered_df, x="Year", y =["goalsPerGame", 'goalsAgainstPerGame'], title ='Goals vs Goals Against Per Game')
-    winsFig = px.line(filtered_df, x = "Year", y = ['wins', 'losses'], title = 'Wins vs Losses')
-    specialFig = px.line(filtered_df, x = 'Year', y=['powerPlayPercentage', 'penaltyKillPercentage'], title = 'Power Play Percentage vs Penalty Kill Percentage')
-    shotsFig = px.line(filtered_df, x='Year', y=['shotsPerGame', 'shotsAllowed'], title = 'Shots vs Shots Allowed Per Game')
-    faceoffsFig = px.line(filtered_df, x='Year', y=['faceOffsWon', 'faceOffsLost'], title = 'Faceoffs Wins vs Losses')
+    team=filtered_df['Team'].unique()[0]
+    colors = color_dict[team]
+
+    goalsFig = px.line(filtered_df, x="Year", y =["goalsPerGame", 'goalsAgainstPerGame'], title ='Goals vs Goals Against Per Game', color_discrete_map = {'goalsPerGame':colors[0], 'goalsAgainstPerGame':colors[1]})
+    winsFig = px.line(filtered_df, x = "Year", y = ['wins', 'losses'], title = 'Wins vs Losses', color_discrete_map = {'wins':colors[0], 'losses':colors[1]})
+    specialFig = px.line(filtered_df, x = 'Year', y=['powerPlayPercentage', 'penaltyKillPercentage'], title = 'Power Play Percentage vs Penalty Kill Percentage', color_discrete_map = {'powerPlayPercentage':colors[0], 'penaltyKillPercentage':colors[1]})
+    shotsFig = px.line(filtered_df, x='Year', y=['shotsPerGame', 'shotsAllowed'], title = 'Shots vs Shots Allowed Per Game', color_discrete_map = {'shotsPerGame':colors[0], 'shotsAllowed':colors[1]})
+    faceoffsFig = px.line(filtered_df, x='Year', y=['faceOffsWon', 'faceOffsLost'], title = 'Faceoffs Wins vs Losses', color_discrete_map = {'faceOffsWon':colors[0], 'faceOffsLost':colors[1]})
     #fig.update_layout(transition_duration=500)
 
     graphsList = []
