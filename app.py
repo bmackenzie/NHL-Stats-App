@@ -44,6 +44,10 @@ df['Year'] = pd.to_numeric(df['Year'])
 
 df['Year'] = pd.to_numeric(df['Year'])
 
+df['powerPlayPercentage'] = pd.to_numeric(df['powerPlayPercentage'])
+
+df['penaltyKillPercentage'] = pd.to_numeric(df['penaltyKillPercentage'])
+
 def generate_table(dataframe, max_rows=10):
     return html.Table([
         html.Thead(
@@ -59,6 +63,10 @@ def generate_table(dataframe, max_rows=10):
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
+    html.H1('Hockey Trends',
+             style={'textAlign': 'center', 'color': 'white','font-size': 40, 'margin-bottom':'2em'}),
+    html.H3('Select a Team',
+             style={'textAlign': 'center', 'color': 'white','font-size': 30}),
     dcc.Dropdown(id='input-team',
             options=[
                 {'label': 'New Jersey Devils', 'value': 'New Jersey Devils'},
@@ -95,18 +103,24 @@ app.layout = html.Div([
                 ],
             placeholder='Select a Team',
             value = 'Philadelphia Flyers',
-            style={'width':'80%','padding':'3px','font-size':'20px','text-align':'center'}),
-    dcc.Dropdown(id ='year-options', style={'width':'80%','padding':'3px','font-size':'20px','text-align':'center'}, value ="2020"),
+            style={'width':'80%','padding':'3px','font-size':'20px','text-align':'center', 'margin':'auto'}),
+    html.H3('Select a Year',
+             style={'textAlign': 'center', 'color': 'white','font-size': 30}),
+    dcc.Dropdown(id ='year-options', style={'width':'80%','padding':'3px','font-size':'20px','text-align':'center', 'margin':'auto'}, value ="2020"),
+    html.H3('Select Visualizations',
+             style={'textAlign': 'center', 'color': 'white','font-size': 30}),
     dcc.Checklist(id='input-graphs',
     options=[
         {'label': 'Wins and Losses', 'value': 'wins'},
         {'label': 'Goals and Goals Against', 'value': 'goals'},
         {'label': 'Special Teams', 'value': 'special-teams'},
         {'label': 'Shots Per Game and Shots Allowed', 'value': 'shots'},
-        {'label': 'Faceoffs Won/Lost', 'value': 'faceoffs'}
+        {'label': 'Faceoffs Won/Lost', 'value': 'faceoffs'},
+        {'label': 'Points', 'value': 'points'}
     ],
-    value=['wins', 'goals', 'special-teams', 'shots', 'faceoffs'],
-    labelStyle={'display': 'inline-block'}
+    value=['wins', 'goals', 'special-teams', 'shots', 'faceoffs', 'points'],
+    labelStyle={'display': 'inline-block'},
+    style={'width':'80%','padding':'3px','font-size':'20px','text-align':'center', 'margin':'auto', 'color':'white'}
     ),
     html.Div([
         html.Div([], id='plot1'),
@@ -143,6 +157,7 @@ def set_year_options(team_name):
     Output(component_id='plot3', component_property='children'),
     Output(component_id='plot4', component_property='children'),
     Output(component_id='plot5', component_property='children'),
+    Output(component_id='plot6', component_property='children'),
     Input('year-options', 'value'),
     Input('input-team', 'value'),
     Input('input-graphs', 'value'),
@@ -153,17 +168,17 @@ def update_figure(selected_year, team, graphs):
         print('test')
 
     filtered_df = df[df['Team'] == team]
-    filtered_df = filtered_df[(filtered_df['Year']>= (int(selected_year) - 2)) & (df['Year']<= (int(selected_year) + 2))]
+    filtered_df = filtered_df[(filtered_df['Year']>= (int(selected_year) - 5)) & (df['Year']<= (int(selected_year) + 5))]
 
     team=filtered_df['Team'].unique()[0]
     colors = color_dict[team]
 
-    goalsFig = px.line(filtered_df, x="Year", y =["goalsPerGame", 'goalsAgainstPerGame'], title ='Goals vs Goals Against Per Game', color_discrete_map = {'goalsPerGame':colors[0], 'goalsAgainstPerGame':colors[1]})
-    winsFig = px.line(filtered_df, x = "Year", y = ['wins', 'losses'], title = 'Wins vs Losses', color_discrete_map = {'wins':colors[0], 'losses':colors[1]})
-    specialFig = px.line(filtered_df, x = 'Year', y=['powerPlayPercentage', 'penaltyKillPercentage'], title = 'Power Play Percentage vs Penalty Kill Percentage', color_discrete_map = {'powerPlayPercentage':colors[0], 'penaltyKillPercentage':colors[1]})
-    shotsFig = px.line(filtered_df, x='Year', y=['shotsPerGame', 'shotsAllowed'], title = 'Shots vs Shots Allowed Per Game', color_discrete_map = {'shotsPerGame':colors[0], 'shotsAllowed':colors[1]})
-    faceoffsFig = px.line(filtered_df, x='Year', y=['faceOffsWon', 'faceOffsLost'], title = 'Faceoffs Wins vs Losses', color_discrete_map = {'faceOffsWon':colors[0], 'faceOffsLost':colors[1]})
-    #fig.update_layout(transition_duration=500)
+    goalsFig = px.line(filtered_df, x="Year", y =["goalsPerGame", 'goalsAgainstPerGame'], title ='Goals vs Goals Against Per Game', color_discrete_map = {'goalsPerGame':colors[0], 'goalsAgainstPerGame':colors[1]}, template="plotly", width = 750)
+    winsFig = px.line(filtered_df, x = "Year", y = ['wins', 'losses'], title = 'Wins vs Losses', color_discrete_map = {'wins':colors[0], 'losses':colors[1]}, template="plotly", width = 750)
+    specialFig = px.line(filtered_df, x = 'Year', y=['powerPlayPercentage', 'penaltyKillPercentage'], title = 'Power Play Percentage vs Penalty Kill Percentage', color_discrete_map = {'powerPlayPercentage':colors[0], 'penaltyKillPercentage':colors[1]}, template="plotly", width = 750)
+    shotsFig = px.line(filtered_df, x='Year', y=['shotsPerGame', 'shotsAllowed'], title = 'Shots vs Shots Allowed Per Game', color_discrete_map = {'shotsPerGame':colors[0], 'shotsAllowed':colors[1]}, template="plotly", width = 750)
+    faceoffsFig = px.line(filtered_df, x='Year', y=['faceOffsWon', 'faceOffsLost'], title = 'Faceoffs Wins vs Losses', color_discrete_map = {'faceOffsWon':colors[0], 'faceOffsLost':colors[1]}, template="plotly", width = 750)
+    pointsFig = px.line(filtered_df, x='Year', y='pts', title = 'Points by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
 
     graphsList = []
     titleList = []
@@ -180,22 +195,27 @@ def update_figure(selected_year, team, graphs):
         elif graph == 'shots':
             graphsList.append(shotsFig)
             titleList.append('Shots vs Shots Allowed')
-        else:
+        elif graph == 'faceoffs':
             graphsList.append(faceoffsFig)
             titleList.append('Faceoff Wins vs Losses')
+        else:
+            graphsList.append(pointsFig)
+            titleList.append('Points by Year')
 
     if len(graphsList) == 0:
-        return(dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
+        return(dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 1:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 2:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 3:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Markdown(), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 4:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 5:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]))
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Markdown())
+    elif len(graphsList) == 6:
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Graph(figure=graphsList[5]))
 
 
 
