@@ -1,20 +1,19 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
 import requests
-
 import pandas as pd
 
 ## TODO: make sure table updates, figure out why year options , update the for years in year part of the df building loop.  Change it so that for each team it grabs every year past the starting year that appears in the api summary for their team
-color_dict = {'New Jersey Devils':['black', 'red'], 'New York Islanders':['blue','orange'], 'New York Rangers':['blue','red'], 'Philadelphia Flyers':['orange', 'black'], 'Pittsburgh Penguins':['black','yellow'], 'Boston Bruins':['black','yellow'], 'Buffalo Sabres':['blue','yellow'], 'Montreal Canadiens':['red','blue'], 'Ottawa Senators': ['red','black'], 'Toronto Maple Leafs':['blue','white'], 'Carolina Hurricanes': ['black','red'], 'Florida Panthers':['blue','red'], 'Tampa Bay Lightning':['silver','blue'], 'Washington Capitals': ['blue','red'], 'Chicago Blackhawks':['red','black'], 'Detroit Red Wings':['red','white'], 'Nashville Predators':['yellow','blue'], 'St. Louis Blues':['blue','yellow'], 'Calgary Flames':['red','orange'], 'Colorado Avalanche':['red','blue'], 'Edmonton Oilers':['orange','blue'], 'Vancouver Canucks':['blue','white'], 'Anaheim Ducks':['green','black'], 'Dallas Stars':['green','white'], 'Los Angeles Kings':['black','white'], 'San Jose Sharks':['green','black'], 'Columbus Blue Jackets':['red','blue'], 'Minnesota Wild':['green','red'], 'Winnipeg Jets':['blue','white'], 'Arizona Coyotes':['green','red'], 'Vegas Golden Knights':['yellow','red']}
-
+color_dict = {'New Jersey Devils':['black', 'red'], 'New York Islanders':['blue','orange'], 'New York Rangers':['blue','red'], 'Philadelphia Flyers':['orange', 'black'], 'Pittsburgh Penguins':['black','yellow'], 'Boston Bruins':['black','yellow'], 'Buffalo Sabres':['blue','yellow'], 'Montreal Canadiens':['red','blue'], 'Ottawa Senators': ['red','black'], 'Toronto Maple Leafs':['blue','silver'], 'Carolina Hurricanes': ['black','red'], 'Florida Panthers':['blue','red'], 'Tampa Bay Lightning':['silver','blue'], 'Washington Capitals': ['blue','red'], 'Chicago Blackhawks':['red','black'], 'Detroit Red Wings':['red','silver'], 'Nashville Predators':['yellow','blue'], 'St. Louis Blues':['blue','yellow'], 'Calgary Flames':['red','orange'], 'Colorado Avalanche':['red','blue'], 'Edmonton Oilers':['orange','blue'], 'Vancouver Canucks':['blue','silver'], 'Anaheim Ducks':['green','black'], 'Dallas Stars':['green','silver'], 'Los Angeles Kings':['black','silver'], 'San Jose Sharks':['green','black'], 'Columbus Blue Jackets':['red','blue'], 'Minnesota Wild':['green','red'], 'Winnipeg Jets':['blue','silver'], 'Arizona Coyotes':['green','red'], 'Vegas Golden Knights':['yellow','red']}
 
 df = pd.read_csv('C:\\Users\\Brian\\dash\\NHL-Stats-App\\NHL-stats.csv', header=0)
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SOLAR])
 
 app.layout = html.Div([
     html.H1('Hockey Trends',
@@ -78,25 +77,42 @@ app.layout = html.Div([
     labelStyle={'display': 'inline-block'},
     style={'width':'80%','padding':'3px','font-size':'20px','text-align':'center', 'margin':'auto', 'color':'white'}
     ),
-    html.Div([
-        html.Div([], id='plot1'),
-        html.Div([], id='plot2')
-    ], style={'display': 'flex'}),
 
-    html.Div([
-            html.Div([], id='plot3'),
-            html.Div([], id='plot4')
-        ], style={'display': 'flex'}),
+    dbc.Row(
+        [
+            dbc.Col(html.Div([], id='plot1'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+            dbc.Col(html.Div([], id='plot2'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+        ]
+    ),
 
-    html.Div([
-            html.Div([], id='plot5'),
-            html.Div([], id='plot6')
-        ], style={'display': 'flex'}),
+    dbc.Row(
+        [
+            dbc.Col(html.Div([], id='plot3'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+            dbc.Col(html.Div([], id='plot4'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+        ]
+    ),
 
-    html.Div([
-            html.Div([], id='plot7'),
-            html.Div([], id='plot8')
-        ], style={'display': 'flex'}),
+    dbc.Row(
+        [
+            dbc.Col(html.Div([], id='plot5'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+            dbc.Col(html.Div([], id='plot6'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+        ]
+    ),
+
+    dbc.Row(
+        [
+            dbc.Col(html.Div([], id='plot7'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+            dbc.Col(html.Div([], id='plot8'),
+            lg={'size':6, 'offset':0}, md={'size':8, 'offset':2}),
+        ]
+    ),
 ])
 
 @app.callback(
@@ -135,22 +151,30 @@ def update_figure(selected_year, team, graphs):
     team=filtered_df['Team'].unique()[0]
     colors = color_dict[team]
 
-    pointsFig = px.line(filtered_df, x="Year", y =["ptPctg"], title ='Point Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    pointsFig = px.line(filtered_df, x="Year", y =["ptPctg"], title ='Point Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Point Percentage', 'variable':'legend'})
     pointsFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['ptPctg'], mode='lines', name='League Median', line=dict(color=colors[1])))
-    goalsFig = px.line(filtered_df, x = "Year", y = ['goalsPerGame'], title = 'Goals Per Game by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
-    goalsFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['ptPctg'], mode='lines', name='League Median', line=dict(color=colors[1])))
-    gaFig = px.line(filtered_df, x = "Year", y = ['goalsAgainstPerGame'], title = 'Goals Against Per Game by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    pointsFig.for_each_trace(lambda t: t.update(name = {'ptPctg':team, 'League Median': 'League Median'}[t.name]))
+    goalsFig = px.line(filtered_df, x = "Year", y = ['goalsPerGame'], title = 'Goals Per Game by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Goals Per Game', 'variable':'legend'})
+    goalsFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['goalsPerGame'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    goalsFig.for_each_trace(lambda t: t.update(name = {'goalsPerGame':team, 'League Median': 'League Median'}[t.name]))
+    gaFig = px.line(filtered_df, x = "Year", y = ['goalsAgainstPerGame'], title = 'Goals Against Per Game by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Goals Against Per Game', 'variable':'legend'})
     gaFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['goalsAgainstPerGame'], mode='lines', name='League Median', line=dict(color=colors[1])))
-    evggaFig = px.line(filtered_df, x = "Year", y = ['evGGARatio'], title = 'Even Strength Goals/Goals Agaisnt Ratio by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    gaFig.for_each_trace(lambda t: t.update(name = {'goalsAgainstPerGame':team, 'League Median': 'League Median'}[t.name]))
+    evggaFig = px.line(filtered_df, x = "Year", y = ['evGGARatio'], title = 'Even Strength Goals/Goals Agaisnt Ratio by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'evGGA Ratio', 'variable':'legend'})
     evggaFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['evGGARatio'], mode='lines', name='League Median', line=dict(color=colors[1])))
-    ppFig = px.line(filtered_df, x = "Year", y = ['powerPlayPercentage'], title = 'Power Play Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    evggaFig.for_each_trace(lambda t: t.update(name = {'evGGARatio':team, 'League Median': 'League Median'}[t.name]))
+    ppFig = px.line(filtered_df, x = "Year", y = ['powerPlayPercentage'], title = 'Power Play Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Power Play Percentage', 'variable':'legend'})
     ppFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['powerPlayPercentage'], mode='lines', name='League Median', line=dict(color=colors[1])))
-    pkFig = px.line(filtered_df, x = "Year", y = ['penaltyKillPercentage'], title = 'Penalty Kill Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    ppFig.for_each_trace(lambda t: t.update(name = {'powerPlayPercentage':team, 'League Median': 'League Median'}[t.name]))
+    pkFig = px.line(filtered_df, x = "Year", y = ['penaltyKillPercentage'], title = 'Penalty Kill Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Penalty Kill Percentage', 'variable':'legend'})
     pkFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['penaltyKillPercentage'], mode='lines', name='League Median', line=dict(color=colors[1])))
-    faceoffsFig = px.line(filtered_df, x = "Year", y = ['faceOffWinPercentage'], title = 'Faceoff Win Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    pkFig.for_each_trace(lambda t: t.update(name = {'penaltyKillPercentage':team, 'League Median': 'League Median'}[t.name]))
+    faceoffsFig = px.line(filtered_df, x = "Year", y = ['faceOffWinPercentage'], title = 'Faceoff Win Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Faceoff Win Percentage', 'variable':'legend'})
     faceoffsFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['faceOffWinPercentage'], mode='lines', name='League Median', line=dict(color=colors[1])))
-    saveFig = px.line(filtered_df, x = "Year", y = ['savePctg'], title = 'Save Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    faceoffsFig.for_each_trace(lambda t: t.update(name = {'faceOffWinPercentage':team, 'League Median': 'League Median'}[t.name]))
+    saveFig = px.line(filtered_df, x = "Year", y = ['savePctg'], title = 'Save Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Save Percentage', 'variable':'legend'})
     saveFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['savePctg'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    saveFig.for_each_trace(lambda t: t.update(name = {'savePctg':team, 'League Median': 'League Median'}[t.name]))
 
     graphsList = []
     titleList = []
