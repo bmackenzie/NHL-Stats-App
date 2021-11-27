@@ -14,10 +14,15 @@ color_dict = {'New Jersey Devils':['black', 'red'], 'New York Islanders':['blue'
 df = pd.read_csv('NHL-stats.csv', header=0)
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SOLAR])
+server = app.server
+
+app.title="NHL Trends"
 
 app.layout = html.Div([
     html.H1('Hockey Trends',
-             style={'textAlign': 'center', 'color': 'white','font-size': 40, 'margin-bottom':'2em'}),
+             style={'textAlign': 'center', 'color': 'white','font-size': 40, 'margin-bottom':'.5em'}),
+    html.P('Made by brian.e.mackenzie@outlook.com',
+            style={'textAlign': 'center', 'color': 'white'}),
     html.H3('Select a Team',
              style={'textAlign': 'center', 'color': 'white','font-size': 30}),
     dcc.Dropdown(id='input-team',
