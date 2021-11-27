@@ -11,7 +11,7 @@ import pandas as pd
 ## TODO: make sure table updates, figure out why year options , update the for years in year part of the df building loop.  Change it so that for each team it grabs every year past the starting year that appears in the api summary for their team
 color_dict = {'New Jersey Devils':['black', 'red'], 'New York Islanders':['blue','orange'], 'New York Rangers':['blue','red'], 'Philadelphia Flyers':['orange', 'black'], 'Pittsburgh Penguins':['black','yellow'], 'Boston Bruins':['black','yellow'], 'Buffalo Sabres':['blue','yellow'], 'Montreal Canadiens':['red','blue'], 'Ottawa Senators': ['red','black'], 'Toronto Maple Leafs':['blue','silver'], 'Carolina Hurricanes': ['black','red'], 'Florida Panthers':['blue','red'], 'Tampa Bay Lightning':['silver','blue'], 'Washington Capitals': ['blue','red'], 'Chicago Blackhawks':['red','black'], 'Detroit Red Wings':['red','silver'], 'Nashville Predators':['yellow','blue'], 'St. Louis Blues':['blue','yellow'], 'Calgary Flames':['red','orange'], 'Colorado Avalanche':['red','blue'], 'Edmonton Oilers':['orange','blue'], 'Vancouver Canucks':['blue','silver'], 'Anaheim Ducks':['green','black'], 'Dallas Stars':['green','silver'], 'Los Angeles Kings':['black','silver'], 'San Jose Sharks':['green','black'], 'Columbus Blue Jackets':['red','blue'], 'Minnesota Wild':['green','red'], 'Winnipeg Jets':['blue','silver'], 'Arizona Coyotes':['green','red'], 'Vegas Golden Knights':['yellow','red']}
 
-df = pd.read_csv('C:\\Users\\Brian\\dash\\NHL-Stats-App\\NHL-stats.csv', header=0)
+df = pd.read_csv('NHL-stats.csv', header=0)
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SOLAR])
 
