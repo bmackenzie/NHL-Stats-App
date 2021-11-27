@@ -3,62 +3,16 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.graph_objects as go
 import requests
 
 import pandas as pd
 
 ## TODO: make sure table updates, figure out why year options , update the for years in year part of the df building loop.  Change it so that for each team it grabs every year past the starting year that appears in the api summary for their team
-color_dict = {'New Jersey Devils':['black', 'red'], 'New York Islanders':['blue','orange'], 'New York Rangers':['blue','red'], 'Philadelphia Flyers':['orange', 'black'], 'Pittsburgh Penguins':['black','yellow'], 'Boston Bruins':['black','yellow'], 'Buffalo Sabres':['blue','yellow'], 'Montréal Canadiens':['red','blue'], 'Ottawa Senators': ['red','black'], 'Toronto Maple Leafs':['blue','white'], 'Carolina Hurricanes': ['black','red'], 'Florida Panthers':['blue','red'], 'Tampa Bay Lightning':['silver','blue'], 'Washington Capitals': ['blue','red'], 'Chicago Blackhawks':['red','black'], 'Detroit Red Wings':['red','white'], 'Nashville Predators':['yellow','blue'], 'St. Louis Blues':['blue','yellow'], 'Calgary Flames':['red','orange'], 'Colorado Avalanche':['red','blue'], 'Edmonton Oilers':['orange','blue'], 'Vancouver Canucks':['blue','white'], 'Anaheim Ducks':['green','black'], 'Dallas Stars':['green','white'], 'Los Angeles Kings':['black','white'], 'San Jose Sharks':['green','black'], 'Columbus Blue Jackets':['red','blue'], 'Minnesota Wild':['green','red'], 'Winnipeg Jets':['blue','white'], 'Arizona Coyotes':['green','red'], 'Vegas Golden Knights':['yellow','red']}
+color_dict = {'New Jersey Devils':['black', 'red'], 'New York Islanders':['blue','orange'], 'New York Rangers':['blue','red'], 'Philadelphia Flyers':['orange', 'black'], 'Pittsburgh Penguins':['black','yellow'], 'Boston Bruins':['black','yellow'], 'Buffalo Sabres':['blue','yellow'], 'Montreal Canadiens':['red','blue'], 'Ottawa Senators': ['red','black'], 'Toronto Maple Leafs':['blue','white'], 'Carolina Hurricanes': ['black','red'], 'Florida Panthers':['blue','red'], 'Tampa Bay Lightning':['silver','blue'], 'Washington Capitals': ['blue','red'], 'Chicago Blackhawks':['red','black'], 'Detroit Red Wings':['red','white'], 'Nashville Predators':['yellow','blue'], 'St. Louis Blues':['blue','yellow'], 'Calgary Flames':['red','orange'], 'Colorado Avalanche':['red','blue'], 'Edmonton Oilers':['orange','blue'], 'Vancouver Canucks':['blue','white'], 'Anaheim Ducks':['green','black'], 'Dallas Stars':['green','white'], 'Los Angeles Kings':['black','white'], 'San Jose Sharks':['green','black'], 'Columbus Blue Jackets':['red','blue'], 'Minnesota Wild':['green','red'], 'Winnipeg Jets':['blue','white'], 'Arizona Coyotes':['green','red'], 'Vegas Golden Knights':['yellow','red']}
 
-ids = ['1','2','3','4','5','6','7','8','9','10','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','28','29','30', '52', '53','54']
 
-years = ['20002001','20012002','20022003','20032004','20052006','20062007','20072008','20082009','20092010','20102011','20112012','20122013','20132014','20142015','20152016','20162017','20172018','20182019','20192020','20202021']
-
-df = pd.DataFrame(columns =['gamesPlayed', 'wins', 'losses', 'ot', 'pts', 'ptPctg', 'goalsPerGame', 'goalsAgainstPerGame', 'evGGARatio', 'powerPlayPercentage', 'powerPlayGoals', 'powerPlayGoalsAgainst', 'powerPlayOpportunities', 'penaltyKillPercentage', 'shotsPerGame', 'shotsAllowed', 'winScoreFirst', 'winOppScoreFirst', 'winLeadFirstPer', 'winLeadSecondPer', 'winOutshootOpp', 'winOutshotByOpp', 'faceOffsTaken', 'faceOffsWon', 'faceOffsLost', 'faceOffWinPercentage', 'shootingPctg', 'savePctg', 'Team'] )
-for i in ids:
-    print(i)
-    teamdata = requests.get('https://statsapi.web.nhl.com/api/v1/teams/' + i)
-    year1 = str(int(teamdata.json()['teams'][0]['firstYearOfPlay'])+1)
-    if i == '53':
-        startpoint = years.index(years[-7])
-    elif int(year1) < int(years[0][0:4]):
-        startpoint = 0
-    else:
-        yearstring = year1 + str(int(year1) +1)
-        startpoint = years.index(yearstring)
-    print(startpoint)
-
-    for year in years[startpoint:]:
-        teams = requests.get('https://statsapi.web.nhl.com/api/v1/teams/' + i +'/?expand=team.stats&season='+year)
-
-        team_name = teams.json()['teams'][0]['name']
-
-        team_stats = teams.json()['teams'][0]['teamStats'][0]['splits'][0]['stat']
-
-        team_stats['Year'] = year[-4:]
-        team_stats['Team'] = team_name
-
-        df = df.append(team_stats, ignore_index = True)
-
-df['Year'] = pd.to_numeric(df['Year'])
-
-df['Year'] = pd.to_numeric(df['Year'])
-
-df['powerPlayPercentage'] = pd.to_numeric(df['powerPlayPercentage'])
-
-df['penaltyKillPercentage'] = pd.to_numeric(df['penaltyKillPercentage'])
-
-def generate_table(dataframe, max_rows=10):
-    return html.Table([
-        html.Thead(
-            html.Tr([html.Th(col) for col in dataframe.columns])
-        ),
-        html.Tbody([
-            html.Tr([
-                html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-            ]) for i in range(min(len(dataframe), max_rows))
-        ])
-    ])
+df = pd.read_csv('C:\\Users\\Brian\\dash\\NHL-Stats-App\\NHL-stats.csv', header=0)
 
 app = dash.Dash(__name__)
 
@@ -76,7 +30,7 @@ app.layout = html.Div([
                 {'label': 'Pittsburgh Penguins', 'value': 'Pittsburgh Penguins'},
                 {'label': 'Boston Bruins', 'value': 'Boston Bruins'},
                 {'label': 'Buffalo Sabres', 'value': 'Buffalo Sabres'},
-                {'label': 'Montréal Canadiens', 'value': 'Montréal Canadiens'},
+                {'label': 'Montréal Canadiens', 'value': 'Montreal Canadiens'},
                 {'label': 'Ottawa Senators', 'value': 'Ottawa Senators'},
                 {'label': 'Toronto Maple Leafs', 'value': 'Toronto Maple Leafs'},
                 {'label': 'Carolina Hurricanes', 'value': 'Carolina Hurricanes'},
@@ -111,14 +65,16 @@ app.layout = html.Div([
              style={'textAlign': 'center', 'color': 'white','font-size': 30}),
     dcc.Checklist(id='input-graphs',
     options=[
-        {'label': 'Wins and Losses', 'value': 'wins'},
-        {'label': 'Goals and Goals Against', 'value': 'goals'},
-        {'label': 'Special Teams', 'value': 'special-teams'},
-        {'label': 'Shots Per Game and Shots Allowed', 'value': 'shots'},
-        {'label': 'Faceoffs Won/Lost', 'value': 'faceoffs'},
-        {'label': 'Points', 'value': 'points'}
+        {'label': 'Point Percentage', 'value': 'points'},
+        {'label': 'Goals Per Game', 'value': 'goals'},
+        {'label': 'Goals Against Per Game', 'value': 'goals against'},
+        {'label': 'Even Strength Goals/Goals Against Ratio', 'value': 'evgga'},
+        {'label': 'Power Play Percentage', 'value': 'pp'},
+        {'label': 'Penalty Kill Percentage', 'value': 'pk'},
+        {'label': 'Faceoffs Win Percentage', 'value': 'faceoffs'},
+        {'label': 'Save Percentage', 'value': 'saves'}
     ],
-    value=['wins', 'goals', 'special-teams', 'shots', 'faceoffs', 'points'],
+    value=['points', 'goals', 'goals against', 'evgga', 'pp', 'pk', 'faceoffs', 'saves'],
     labelStyle={'display': 'inline-block'},
     style={'width':'80%','padding':'3px','font-size':'20px','text-align':'center', 'margin':'auto', 'color':'white'}
     ),
@@ -136,6 +92,11 @@ app.layout = html.Div([
             html.Div([], id='plot5'),
             html.Div([], id='plot6')
         ], style={'display': 'flex'}),
+
+    html.Div([
+            html.Div([], id='plot7'),
+            html.Div([], id='plot8')
+        ], style={'display': 'flex'}),
 ])
 
 @app.callback(
@@ -151,71 +112,92 @@ def set_year_options(team_name):
 
 
 @app.callback(
-    #Output('graph-with-slider', 'figure'),
     Output(component_id='plot1', component_property='children'),
     Output(component_id='plot2', component_property='children'),
     Output(component_id='plot3', component_property='children'),
     Output(component_id='plot4', component_property='children'),
     Output(component_id='plot5', component_property='children'),
     Output(component_id='plot6', component_property='children'),
+    Output(component_id='plot7', component_property='children'),
+    Output(component_id='plot8', component_property='children'),
     Input('year-options', 'value'),
     Input('input-team', 'value'),
     Input('input-graphs', 'value'),
     )
 def update_figure(selected_year, team, graphs):
     #make graphs based on checkboxes
-    if 'wins' in graphs:
-        print('test')
-
     filtered_df = df[df['Team'] == team]
-    filtered_df = filtered_df[(filtered_df['Year']>= (int(selected_year) - 5)) & (df['Year']<= (int(selected_year) + 5))]
+    filtered_df = filtered_df[(filtered_df['Year']>= (int(selected_year) - 5)) & (filtered_df['Year']<= (int(selected_year) + 5))]
+
+    avg_df = df[df['Team'] == 'League Median']
+    filtered_avg_df = avg_df[(avg_df['Year']>= (int(selected_year) - 5)) & (avg_df['Year']<= (int(selected_year) + 5))]
 
     team=filtered_df['Team'].unique()[0]
     colors = color_dict[team]
 
-    goalsFig = px.line(filtered_df, x="Year", y =["goalsPerGame", 'goalsAgainstPerGame'], title ='Goals vs Goals Against Per Game', color_discrete_map = {'goalsPerGame':colors[0], 'goalsAgainstPerGame':colors[1]}, template="plotly", width = 750)
-    winsFig = px.line(filtered_df, x = "Year", y = ['wins', 'losses'], title = 'Wins vs Losses', color_discrete_map = {'wins':colors[0], 'losses':colors[1]}, template="plotly", width = 750)
-    specialFig = px.line(filtered_df, x = 'Year', y=['powerPlayPercentage', 'penaltyKillPercentage'], title = 'Power Play Percentage vs Penalty Kill Percentage', color_discrete_map = {'powerPlayPercentage':colors[0], 'penaltyKillPercentage':colors[1]}, template="plotly", width = 750)
-    shotsFig = px.line(filtered_df, x='Year', y=['shotsPerGame', 'shotsAllowed'], title = 'Shots vs Shots Allowed Per Game', color_discrete_map = {'shotsPerGame':colors[0], 'shotsAllowed':colors[1]}, template="plotly", width = 750)
-    faceoffsFig = px.line(filtered_df, x='Year', y=['faceOffsWon', 'faceOffsLost'], title = 'Faceoffs Wins vs Losses', color_discrete_map = {'faceOffsWon':colors[0], 'faceOffsLost':colors[1]}, template="plotly", width = 750)
-    pointsFig = px.line(filtered_df, x='Year', y='pts', title = 'Points by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    pointsFig = px.line(filtered_df, x="Year", y =["ptPctg"], title ='Point Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    pointsFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['ptPctg'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    goalsFig = px.line(filtered_df, x = "Year", y = ['goalsPerGame'], title = 'Goals Per Game by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    goalsFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['ptPctg'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    gaFig = px.line(filtered_df, x = "Year", y = ['goalsAgainstPerGame'], title = 'Goals Against Per Game by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    gaFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['goalsAgainstPerGame'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    evggaFig = px.line(filtered_df, x = "Year", y = ['evGGARatio'], title = 'Even Strength Goals/Goals Agaisnt Ratio by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    evggaFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['evGGARatio'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    ppFig = px.line(filtered_df, x = "Year", y = ['powerPlayPercentage'], title = 'Power Play Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    ppFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['powerPlayPercentage'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    pkFig = px.line(filtered_df, x = "Year", y = ['penaltyKillPercentage'], title = 'Penalty Kill Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    pkFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['penaltyKillPercentage'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    faceoffsFig = px.line(filtered_df, x = "Year", y = ['faceOffWinPercentage'], title = 'Faceoff Win Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    faceoffsFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['faceOffWinPercentage'], mode='lines', name='League Median', line=dict(color=colors[1])))
+    saveFig = px.line(filtered_df, x = "Year", y = ['savePctg'], title = 'Save Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", width = 750)
+    saveFig.add_trace(go.Scatter(x=filtered_avg_df['Year'], y=filtered_avg_df['savePctg'], mode='lines', name='League Median', line=dict(color=colors[1])))
 
     graphsList = []
     titleList = []
     for graph in graphs:
-        if graph == 'wins':
-            graphsList.append(winsFig)
-            titleList.append('Wins vs Losses')
+        if graph == 'points':
+            graphsList.append(pointsFig)
+            titleList.append('Point Percentage by Year')
         elif graph == 'goals':
             graphsList.append(goalsFig)
-            titleList.append('Goals vs Goals Against')
-        elif graph == 'special-teams':
-            graphsList.append(specialFig)
-            titleList.append('Power Play Percentage vs Penalty Kill Percantage')
-        elif graph == 'shots':
-            graphsList.append(shotsFig)
-            titleList.append('Shots vs Shots Allowed')
+            titleList.append('Goals Per Game By Year')
+        elif graph == 'goals against':
+            graphsList.append(gaFig)
+            titleList.append('Goals Against Per Game by Year')
+        elif graph == 'evgga':
+            graphsList.append(evggaFig)
+            titleList.append('Even Strength Goals/Goals Agaisnt Ratio by Yea')
+        elif graph == 'pp':
+            graphsList.append(ppFig)
+            titleList.append('Power Play Percentage by Year')
+        elif graph == 'pk':
+            graphsList.append(pkFig)
+            titleList.append('Penalty Kill Percentage by Year')
         elif graph == 'faceoffs':
             graphsList.append(faceoffsFig)
-            titleList.append('Faceoff Wins vs Losses')
+            titleList.append('Faceoff Percentage by Year')
         else:
-            graphsList.append(pointsFig)
-            titleList.append('Points by Year')
+            graphsList.append(saveFig)
+            titleList.append('Save Percentage by Year')
 
     if len(graphsList) == 0:
-        return(dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
+        return(dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 1:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 2:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 3:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 4:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Markdown(), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 5:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Markdown())
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Markdown(), dcc.Markdown(), dcc.Markdown())
     elif len(graphsList) == 6:
-        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Graph(figure=graphsList[5]))
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Graph(figure=graphsList[5]), dcc.Markdown(), dcc.Markdown())
+    elif len(graphsList) == 7:
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Graph(figure=graphsList[5]), dcc.Graph(figure=graphsList[6]), dcc.Markdown())
+    elif len(graphsList) == 8:
+        return (dcc.Graph(figure=graphsList[0]), dcc.Graph(figure=graphsList[1]), dcc.Graph(figure=graphsList[2]), dcc.Graph(figure=graphsList[3]), dcc.Graph(figure=graphsList[4]), dcc.Graph(figure=graphsList[5]), dcc.Graph(figure=graphsList[6]), dcc.Graph(figure=graphsList[7]))
 
 
 
