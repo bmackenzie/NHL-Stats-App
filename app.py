@@ -143,6 +143,7 @@ app.layout = html.Div([
     ),
 ])
 
+#Set year dropdown options based on what years the team has stats for.
 @app.callback(
         Output('year-options', 'options'),
         Input('input-team', 'value'),
@@ -169,16 +170,18 @@ def set_year_options(team_name):
     Input('input-comparison', 'value'),
     )
 def update_figure(selected_year, team, comparison):
-    #make graphs based on checkboxes
+    #Create df that only holds data for selected team
     filtered_df = df[df['Team'] == team]
     filtered_df = filtered_df[(filtered_df['Year']>= (int(selected_year) - 5)) & (filtered_df['Year']<= (int(selected_year) + 5))]
 
+    #Create df that only holds data for comparison team
     comp_df = df[df['Team'] == comparison]
     filtered_comp_df = comp_df[(comp_df['Year']>= (int(selected_year) - 5)) & (comp_df['Year']<= (int(selected_year) + 5))]
 
     team=filtered_df['Team'].unique()[0]
     colors = color_dict[team]
 
+    #Create figures, add line from comparison dataframe
     pointsFig = px.line(filtered_df, x="Year", y =["ptPctg"], title ='Point Percentage by Year', color_discrete_sequence = [colors[0]], template="plotly", labels={'Year':'Year', 'value':'Point Percentage', 'variable':'legend'})
     pointsFig.add_trace(go.Scatter(x=filtered_comp_df['Year'], y=filtered_comp_df['ptPctg'], mode='lines', name=comparison, line=dict(color=colors[1])))
     pointsFig.for_each_trace(lambda t: t.update(name = {'ptPctg':team, comparison: comparison}[t.name]))
